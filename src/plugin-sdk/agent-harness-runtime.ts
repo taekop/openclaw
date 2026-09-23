@@ -52,6 +52,7 @@ import { truncateUtf16Safe } from "../utils.js";
 
 export { projectAgentActivityItem } from "../agents/agent-activity-presentation.js";
 export { projectAgentToolActivity } from "../infra/agent-activity-events.js";
+export { selectSupportedReasoningEffort } from "../agents/harness/reasoning-effort.js";
 
 /** Default truncation limit for user-facing tool progress output. */
 export const TOOL_PROGRESS_OUTPUT_MAX_CHARS = 8_000;

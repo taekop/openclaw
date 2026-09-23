@@ -48,6 +48,16 @@ immediately before provider dispatch. A thrown error or an aborted
 `options.signal` prevents dispatch; the callback stays outside provider options.
 Existing three-argument calls remain supported.
 
+The `resolveOpenAIReasoningEffortIntent(model, reasoning)` helper from the same
+SDK subpath resolves the OpenAI model's configured native effort and supported
+efforts without choosing a fallback.
+
+Native harnesses can use `selectSupportedReasoningEffort` from
+`openclaw/plugin-sdk/agent-harness-runtime` with their validated effort order and
+supported efforts. It keeps a supported request, otherwise chooses the next
+higher supported effort, or the highest available effort when none is higher.
+Backend adapters retain protocol validation and special-mode handling.
+
 ## Model namespaces
 
 <AccordionGroup>

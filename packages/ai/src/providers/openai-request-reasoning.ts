@@ -29,19 +29,13 @@ export function resolveOpenAIRequestReasoning(
   },
   reasoning: string | undefined,
 ): { effort: string | undefined; thinkingEnabled: boolean | undefined } {
-  // Logical off can map to a minimum effort; native none only uses its own explicit mapping.
-  const requested = normalizeOpenAIReasoningEffort(reasoning ?? "off");
-  const modelLevel = MODEL_CATALOG_THINKING_LEVELS.find((candidate) => candidate === requested);
-  const modelMapped = modelLevel ? model.thinkingLevelMap?.[modelLevel] : undefined;
-  const mapped =
-    modelMapped === null
-      ? null
-      : (resolveOpenAIReasoningEffortMapping(requested, resolveOpenAIReasoningEffortMap(model)) ??
-        modelMapped);
-  const intent =
-    mapped !== undefined ? mapped?.trim() : reasoning === undefined ? undefined : requested;
+  const {
+    requested,
+    mapped,
+    effort: intent,
+    supportedEfforts: supported,
+  } = resolveOpenAIReasoningEffortIntent(model, reasoning);
   const normalizedIntent = normalizeOpenAIReasoningEffort(intent ?? "off");
-  const supported = resolveOpenAIModelReasoningEfforts(model);
   const effort =
     !model.reasoning || supported?.length === 0 || intent === undefined
       ? undefined
@@ -72,5 +66,33 @@ export function resolveOpenAIRequestReasoning(
       intent === undefined
         ? undefined
         : model.reasoning && normalizedIntent !== "off" && normalizedIntent !== "none",
+  };
+}
+
+/** Resolve native intent and capabilities without selecting a fallback effort. */
+export function resolveOpenAIReasoningEffortIntent(
+  model: Parameters<typeof resolveOpenAIRequestReasoning>[0],
+  reasoning: string | undefined,
+): {
+  requested: string;
+  mapped: string | null | undefined;
+  effort: string | undefined;
+  supportedEfforts: readonly string[] | undefined;
+} {
+  // Logical off can map to a minimum effort; native none only uses its own explicit mapping.
+  const requested = normalizeOpenAIReasoningEffort(reasoning ?? "off");
+  const modelLevel = MODEL_CATALOG_THINKING_LEVELS.find((candidate) => candidate === requested);
+  const modelMapped = modelLevel ? model.thinkingLevelMap?.[modelLevel] : undefined;
+  const mapped =
+    modelMapped === null
+      ? null
+      : (resolveOpenAIReasoningEffortMapping(requested, resolveOpenAIReasoningEffortMap(model)) ??
+        modelMapped);
+  return {
+    requested,
+    mapped,
+    effort:
+      mapped !== undefined ? mapped?.trim() : reasoning === undefined ? undefined : requested,
+    supportedEfforts: resolveOpenAIModelReasoningEfforts(model),
   };
 }
